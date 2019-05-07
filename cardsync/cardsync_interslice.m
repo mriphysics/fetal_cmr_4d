@@ -1,5 +1,13 @@
-function [ thetaOffset, overlap, noOverlap, searchFailed, isExcludeLoc, hFig ] = cardsync_interloc( varargin )
-%CARDSYNC_INTERLOC  synchcronise cardiac cycles between slice-locations
+function [ S, thetaOffset, overlap, noOverlap, searchFailed, isExcludeLoc, hFig ] = cardsync_interslice( S, varargin )
+%CARDSYNC_INTERSLICE  Synchcronise cardiac cycles between slice-locations.
+%
+%   S = CARDSYNC_INTERSLICE( S ) takes structure S returned by CARDSYNC_INTERSLICE 
+%   and adds heart rate estimation fields. 
+%
+%   CARDSYNC_INTERSLICE( ..., 'name', value ) specifies optional input argument. 
+%   See code for name-value pairs.
+%
+%   See also PREPROC, CARDSYNC_INTERSLICE.
 %
 
 %   jfpva (joshua.vanamerom@kcl.ac.uk)
@@ -7,13 +15,13 @@ function [ thetaOffset, overlap, noOverlap, searchFailed, isExcludeLoc, hFig ] =
 
 %% Optional Input Argument Default Values
 
-default.reconDir        = pwd;      % path of directory cine reconstructions for each slice in loc00000 directories
+default.reconDir        = pwd;      % path of parent directory of cine reconstructions for each slice in loc00000 directories
 default.resultsDir      = pwd;      % path of directory to save results
 default.tgtLoc          = NaN;      % initial slice-location target
 default.tgtThetaOffset  = 0;        % cardiac phase offset of initial slice-location target
 default.excludeLoc      = [];       % excluded specified slice locations from synchronisation
 default.overlapTol      = 0.1;      % minimum overlap tolerance, as fraction of maximum overlap, slices with lower overlap will not be considered to be overlapping
-default.niftiPath       = fullfile(fileparts(mfilename('fullpath')),'lib','nifti');  %'~/Documents/MATLAB/Toolboxes/NIfTI_20140122';
+default.niftiPath       = fullfile(fileparts(mfilename('fullpath')),'lib','nifti');  % path of NIfTI I/O toolbox
 default.isVerbose       = true;
 
 
@@ -26,6 +34,9 @@ if  verLessThan('matlab','8.2')
 else
     add_param_fn = @( parseobj, argname, defaultval, validator ) addParameter( parseobj, argname, defaultval, validator );
 end
+
+addRequired(   p, 'S', ... 
+    @(x) validateattributes( x, {'struct'}, {'vector'}, mfilename) );
 
 add_param_fn(   p, 'recondir', default.reconDir, ...
     @(x) validateattributes( x, {'char'}, {'vector'}, mfilename) );
@@ -51,7 +62,7 @@ add_param_fn(   p, 'niftipath', default.niftiPath, ...
 add_param_fn(   p, 'verbose', default.isVerbose, ...
     @(x) validateattributes( x, {'logical'}, {'scalar'}, mfilename) );
 
-parse( p, varargin{:} );
+parse( p, S, varargin{:} );
 
 reconDir        = p.Results.recondir;
 resultsDir      = p.Results.resultsdir;
@@ -176,7 +187,7 @@ if (isVerbose)
 end
 
 
-%% Overlap
+%% Sum Overlap Between Slice-Location and All Other Slice-Locations
 
 v = volWgtOverlap; 
 v = triu( v, 1 ) + tril( v, -1 );
@@ -210,7 +221,7 @@ if ~exist( resultsDir, 'dir' )
     system( sprintf( 'mkdir -p %s', resultsDir ) );
 end
 
-diary( fullfile( resultsDir, 'log_cardsync_interloc.txt' ) )
+diary( fullfile( resultsDir, 'log_cardsync_interslice.txt' ) )
 
 
 %% Setup Target Slice-Location
@@ -407,11 +418,6 @@ end
 diary off
 
 
-%% Save Results
-
-save( fullfile( resultsDir, 'theta_offset' ), 'thetaOffset', 'overlap', 'noOverlap', 'searchFailed', 'isExcludeLoc' )
-
-
 %% Save Figures
 
 figDir = fullfile( resultsDir, 'figs' );
@@ -427,7 +433,118 @@ matfigDir = fullfile( figDir, 'fig' );
 save_figs( pngDir, hFig, matfigDir );
 
 
-end  % cardsync_interloc(...)
+%% Update Timing
+
+angsum = @(v) angle( exp( sqrt(-1) * sum(v(:) ) ) );  % range [-pi,+pi]
+
+locNum = 1;
+
+nStack = length(S);
+
+for iStk = 1:nStack     
+   
+    for iLoc = 1:S(iStk).nLoc
+        
+        offset = angsum( thetaOffset(locNum) );
+        
+        tRTrigger = S(iStk).tRTrigger{iLoc} - offset/(2*pi) * S(iStk).tRR{iLoc};
+        if tRTrigger(end) < S(iStk).tFrame{iLoc}(end)
+            tRTrigger = [ tRTrigger, tRTrigger(end) + S(iStk).tRR{iLoc} ];
+        end
+        if tRTrigger(1) > S(iStk).tFrame{iLoc}(1)
+            tRTrigger = [ tRTrigger(1) - S(iStk).tRR{iLoc}, tRTrigger ] ;
+        end
+        while tRTrigger(end-1) > S(iStk).tFrame{iLoc}(end)
+            tRTrigger = tRTrigger(1:(end-1));
+        end
+        while tRTrigger(2) < S(iStk).tFrame{iLoc}(1)
+            tRTrigger = tRTrigger(2:end);
+        end
+        
+        tSinceRTrigger = calc_cardiac_timing( S(iStk).tFrame{iLoc}, tRTrigger ); 
+        S(iStk).thetaOffset{iLoc} = offset; 
+        S(iStk).tRTrigger{iLoc} = tRTrigger;
+        [ ~, cardPhaseFraction ] = calc_cardiac_timing( S(iStk).tFrame{iLoc}, S(iStk).tRTrigger{iLoc} );
+        S(iStk).thetaFrame{iLoc} = 2 * pi * cardPhaseFraction;
+        
+        locNum = locNum + 1;
+
+    end
+    
+end
+
+
+%% Save Updated Timing to Text File
+
+fid = fopen( fullfile( resultsDir, 'cardphases_interslice_cardsync.txt' ), 'w' );
+fprintf( fid, '%.6f ', cell2mat( [ S.thetaFrame ] ) );
+fclose( fid );
+
+
+%% Save Results to .mat File
+
+save( fullfile( resultsDir, 'results_interslice_cardsync.mat' ), 'S', 'thetaOffset', 'overlap', 'noOverlap', 'searchFailed', 'isExcludeLoc', '-v7.3' )
+
+
+end  % cardsync_interslice(...)
+
+
+%% Function: calc_cineloc_bootstrap_similarity
+function [ sim, cc, wgt ] = calc_cineloc_bootstrap_similarity( X, W, M, locs, thetaOffset )
+
+% Setup
+
+nLoc = numel(X);
+
+for iLoc = 1:nLoc
+    if ( size( M{iLoc}, 4 ) == 1 )
+        M{iLoc} = repmat( M{iLoc}, 1, 1, 1, nLoc );
+    end
+end
+
+
+% Anonymous Functions
+
+cycshift   = @(C,cardPhaseOffset) fouriershift( C, cardPhaseOffset/(2*pi), 4 );
+subindex   = @(a,r,c) a(r,c); 
+ccoef      = @(a,b,m) subindex(corrcoef(max(a(m),0),max(b(m),0)),2,1);
+
+
+% Apply Cyclic Shift
+
+if ( thetaOffset{ 1 } ~= 0 )
+    X{1} = cycshift( X{1}, thetaOffset{1} );
+    W{1} = cycshift( W{1}, thetaOffset{1} );
+end
+
+
+% Calculate Similarity
+
+cc  = zeros(nLoc,nLoc);
+wgt = zeros(nLoc,nLoc);
+
+locs1 = reshape( locs(:,1), 1, [] );
+locs2 = reshape( locs(:,2), 1, [] );
+
+for iPair = 1:numel(locs1)
+    iLoc1 = locs1(iPair);
+    iLoc2 = locs2(iPair);
+    x1 = X{iLoc1};
+    x2 = X{iLoc2};
+    w1 = W{iLoc1};
+    w2 = W{iLoc2};
+    w  = w1 .* w2;
+    m  = ( M{iLoc1} .* M{iLoc2} ) > 0;
+    cc(iLoc1,iLoc2)  = ccoef( x1, x2, m );
+    wgt(iLoc1,iLoc2) = sum( w( m ) );
+end
+
+cc(isnan(cc))   = 0;
+
+sim = sum( wgt(:) .* cc(:) ) / sum( wgt(:) );
+
+
+end  % calc_cineloc_bootstrap_similarity(...)
 
 
 %% Function: objectivefn_bootstrap

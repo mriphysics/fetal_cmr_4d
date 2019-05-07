@@ -1,5 +1,12 @@
 function y = fouriershift( x, shift, dim )
+%FOURIERSHIFT  Apply Fourier shift to array.
+%
+%   y = FOURIERSHIFT( x, shift, dim ) applies cyclic Fourier shift to x in 
+%	dimenision specified by dim and returns the result as y.
 
+%   jfpva (joshua.vanamerom@kcl.ac.uk)
+% 	Adapted from FourierShift.m by Tim Hutt, 24/03/2009.
+	
 % The length in specified dimension.
 N = size(x,dim);
 

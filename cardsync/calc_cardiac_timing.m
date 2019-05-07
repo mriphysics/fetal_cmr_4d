@@ -45,3 +45,6 @@ for iFrame = 1:nFrame
 
 end
 
+
+end  % calc_cardiac_timing(...) 
+
