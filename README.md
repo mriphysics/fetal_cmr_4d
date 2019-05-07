@@ -2,7 +2,7 @@
 
 fetal whole-heart 4d reconstruction using motion-corrected multi-planar real-time MRI
 
-## Publications
+## Publications
 
 __Fetal whole-heart 4D imaging using motion-corrected multi-planar real-time MRI.__  
 Joshua FP van Amerom, David FA Lloyd, Maria Deprez, Anthony N Price, Shaihan J Malik, Kuberan Pushparajah, Milou PM van Poppel, Mary A Rutherford, Reza Razavi, Joseph V Hajnal.  
@@ -20,7 +20,7 @@ __irtk_cardiac4d__ - 4D reconstruction submodule linked to [github.com/jfpva/irt
 __ktrecon__ - k-t sense reconstruction submodule linked to  [github.com/jfpva/ktrecon](https://github.com/jfpva/ktrecon)  
 
 
-## Installation
+## Installation
 
 Build instructions for irtk can be found at [sites.google.com/site/mariakuklisovamurgasova/software](https://sites.google.com/site/mariakuklisovamurgasova/software).
 
@@ -30,19 +30,17 @@ Build instructions for irtk can be found at [sites.google.com/site/mariakuklisov
 __ReconFrame__ - software platform providing the tools and the functionality to develop and execute a complete image reconstruction of Philips MR data ([gyrotools.com/gt/index.php/products/reconframe](https://www.gyrotools.com/gt/index.php/products/reconframe))  
 
 
-## Framework 
+## Framework 
 
 Framework for 4D cine reconstruction, consists of:
 
-a. acquisition and reconstruction of multi-planar dynamic2DMRI; 
-b. an initial motion correction stage to achieve rough spatial alignment of the fetal heart using temporal mean (i.e., static) images for stack-stack registration followed by slice-volume registration interleaved with static volume (3D) reconstruction; 
-c. cardiac synchronisation, including heart rate estimation and slice-slice cardiac cycle alignment; and 
-d. further motion-correction using dynamic image frames interleaved with 4D reconstruction; and 
-e. a final 4D cine reconstruction, including outlier rejection.  
+1. acquisition and reconstruction of multi-planar dynamic2DMRI; 
+2. an initial motion correction stage to achieve rough spatial alignment of the fetal heart using temporal mean (i.e., static) images for stack-stack registration followed by slice-volume registration interleaved with static volume (3D) reconstruction; 
+3. cardiac synchronisation, including heart rate estimation and slice-slice cardiac cycle alignment; and 
+4. further motion-correction using dynamic image frames interleaved with 4D reconstruction; and 
+5. a final 4D cine reconstruction, including outlier rejection.  
 
 ![](4d_framework.png)  
-
-\
 
 User-specified ROIs, and identification of a target stack for stack-stack registration are the only manual preparations required for reconstruction.
 
@@ -60,7 +58,7 @@ mkdir $RECONDIR/mask
 mkdir $RECONDIR/cardsync
 ```
 
-a. __MRI__
+1. __MRI__
     - acquire 2D multi-planar real-time MRI data
     - reconstruct images using `ktrecon`, \
     e.g., for each stack, in Matlab:  
@@ -101,7 +99,7 @@ a. __MRI__
         - optionally, manually specify
             - target stack by changing value in 'data/tgt_stack_no.txt' (stacks are index 1,2,...)
             - excluded stacks/slices/frames by specifying in 'data/force_exclude_*.txt' (stacks/slices/frames are zero-indexed)
-b. __Motion-Correction (static)__
+2. __Motion-Correction (static)__
     - create 3D mask of fetal chest
         - recon reference volume, \
         e.g., in shell: 
@@ -118,7 +116,7 @@ b. __Motion-Correction (static)__
         RECONDIR=~/path/to/recon/directory˜
         ./recon_dc_vol.bash $RECONDIR dc_vol
         ```
-c. __Cardiac Synchronisation__
+3. __Cardiac Synchronisation__
     - heart-rate estimation
         - run `cardsync_intraslice`, in Matlab:
             ```matlab
@@ -166,9 +164,9 @@ c. __Cardiac Synchronisation__
             % slice-slice cardiac synchronisation
             S = cardsync_interslice( M.S, 'recondir', cineDir, 'resultsdir', cardsyncDir, 'tgtloc', tgtLoc, 'excludeloc', excludeSlice );
             ```
-d. __Motion-Correction (dynamic)__
+4. __Motion-Correction (dynamic)__
     - performed interleaved with 4D Reconstruction
-e. __4D Reconstruction__
+5. __4D Volumetric Reconstruction__
     - recon 4D (cine) volume, \
     e.g., in shell: 
     ```shell
