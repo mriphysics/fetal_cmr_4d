@@ -15,6 +15,8 @@ __4drecon__ - preprocessing and 4D reconstruction scripts
 
 __cardsync__ - cardiac synchronisation   
 
+__eval__ - summarise and evaluate results
+
 __irtk_cardiac4d__ - 4D reconstruction submodule linked to [github.com/jfpva/irtk_cardiac4d](https://github.com/jfpva/irtk_cardiac4d), built on the Image Registration Toolkit (IRTK) v2.0.  
 
 __ktrecon__ - k-t sense reconstruction submodule linked to  [github.com/jfpva/ktrecon](https://github.com/jfpva/ktrecon)  
@@ -47,10 +49,11 @@ User-specified ROIs, and identification of a target stack for stack-stack regist
 
 ## Steps
 
-Setup: create working directories,  
-e.g., in shell: 
+__Setup__  \
+create working directories,  \
+e.g., in shell:  
 ```shell 
-RECONDIR=~/path/to/recon/directory˜
+RECONDIR=~/path/to/recon/directory
 mkdir $RECONDIR
 mkdir $RECONDIR/data
 mkdir $RECONDIR/ktrecon
@@ -104,7 +107,7 @@ mkdir $RECONDIR/cardsync
         - recon reference volume, \
         e.g., in shell: 
         ```shell
-        RECONDIR=~/path/to/recon/directory˜
+        RECONDIR=~/path/to/recon/directory
         ./recon_ref_vol.bash $RECONDIR ref_vol
         ```
         - draw fetal chest ROI using 'ref_vol.nii.gz' as a reference (e.g., using MITK)
@@ -130,7 +133,7 @@ mkdir $RECONDIR/cardsync
         - recon cine volume for each slice, \
         e.g., in shell: 
             ```shell
-            RECONDIR=~/path/to/recon/directory˜
+            RECONDIR=~/path/to/recon/directory
             ./recon_slice_cine.bash $RECONDIR
             ```
         - optionally, specify target slice by creating file 'data/tgt_slice_no.txt' containing target slice number (indexed starting at 1)
@@ -170,6 +173,13 @@ mkdir $RECONDIR/cardsync
     - recon 4D (cine) volume, \
     e.g., in shell: 
     ```shell
-    RECONDIR=~/path/to/recon/directory˜
+    RECONDIR=~/path/to/recon/directory
     ./recon_cine_vol.bash $RECONDIR cine_vol
     ```
+
+__Summarise__  \
+e.g., in Matlab:  
+```matlab
+S = summarise_recon( '~/path/to/recon/directory/cine_vol', '~/path/to/recon/directory/cardsync', 'verbose', true );
+I = plot_info( '~/path/to/recon/directory/cine_vol/info.tsv');
+```
