@@ -168,7 +168,7 @@ for iStk = 1:nStack
     S(iStk).hrOutlierPeakHeight = isOutlierPeakHeight( sum([S(1:(iStk-1)).nLoc]) + (1:S(iStk).nLoc) );
     S(iStk).hrOutlierPeakWidth  = isOutlierPeakWidth( sum([S(1:(iStk-1)).nLoc]) + (1:S(iStk).nLoc) );
     S(iStk).hrOutlier = S(iStk).hrOutlierPeakHeight | S(iStk).hrOutlierPeakWidth; 
-    for iLoc = find( S(iStk).hrOutlier )
+    for iLoc = find( isnan(cell2mat(S(iStk).tRRest)) | S(iStk).hrOutlier )
         % Update Timing
         rrInterval  = tRR(iLoc);    
         nTrigger    = ceil( numel(S(iStk).tFrame{iLoc}) * S(iStk).frameDuration / rrInterval );
@@ -206,7 +206,9 @@ if ( isVerbose )
     nLocMax = max([S.nLoc]);
     rgbPeakHeight = [171,217,233]/255; 
     rgbPeakWidth  = [44,123,182]/255; 
-    rgbOut        = [215,25,28]/255; 
+    rgbOutPeakHeight = [237,176,33]/255; 
+    rgbOutPeakWidth  = [215,25,28]/255; 
+    rgbOutFailHrEst  = [163,20,46]/255; 
     rgbIn         = 0.5*ones(nLocMax+1,3); 
     markerIconOut = '+';
     markerSizeOut = 5;
@@ -225,11 +227,15 @@ if ( isVerbose )
     for iStk = 1:nStack
         for iLoc = 1:S(iStk).nLoc  
             hr     = 0.06./S(iStk).tRRest{iLoc};
-            if isOutlierPeakHeight(i)
-                h = plot( mean([tStart(i),tEnd(i)]), hr*1000, markerIconOut, 'Color', rgbOut, 'LineWidth', 2, 'MarkerSize', markerSizeOut  );
+            if isnan(hr)
+                hr = 0.06./S(iStk).tRR{iLoc};
+                h = plot( mean([tStart(i),tEnd(i)]), hr*1000, markerIconOut, 'Color', rgbOutFailHrEst, 'LineWidth', 2, 'MarkerSize', markerSizeOut  );
+                h.DisplayName = 'failed HR estimate';
+            elseif isOutlierPeakHeight(i)
+                h = plot( mean([tStart(i),tEnd(i)]), hr*1000, markerIconOut, 'Color', rgbOutPeakHeight, 'LineWidth', 2, 'MarkerSize', markerSizeOut  );
                 h.DisplayName = 'outlier due to peak height';
             elseif isOutlierPeakWidth(i)
-                h = plot( mean([tStart(i),tEnd(i)]), hr*1000, markerIconOut, 'Color', rgbOut, 'LineWidth', 2, 'MarkerSize', markerSizeOut  );
+                h = plot( mean([tStart(i),tEnd(i)]), hr*1000, markerIconOut, 'Color', rgbOutPeakWidth, 'LineWidth', 2, 'MarkerSize', markerSizeOut  );
                 h.DisplayName = 'outlier due to peak width';
             end
             i=i+1;
@@ -271,8 +277,7 @@ if ( isVerbose )
         for iLoc = 1:S(iStk).nLoc  
             peakH(i)  = S(iStk).hrEstRelPeakProminence(iLoc);
             if isOutlierPeakHeight(i)
-                plot( mean([tStart(i),tEnd(i)]), peakH(i), markerIconOut, 'Color', rgbOut, 'LineWidth', 2, 'MarkerSize', markerSizeOut );
-                
+                plot( mean([tStart(i),tEnd(i)]), peakH(i), markerIconOut, 'Color', rgbOutPeakHeight, 'LineWidth', 2, 'MarkerSize', markerSizeOut );
             else
                 plot( [tStart(i),tEnd(i)], peakH(i)*[1,1], 'LineWidth', 4, 'Color', rgbPeakHeight );
             end
@@ -301,7 +306,7 @@ if ( isVerbose )
         for iLoc = 1:S(iStk).nLoc  
             peakW(i)  = S(iStk).hrEstPeakWidth(iLoc);
             if isOutlierPeakWidth(i)
-                plot( mean([tStart(i),tEnd(i)]), 60*peakW(i), markerIconOut, 'Color', rgbOut, 'LineWidth', 2, 'MarkerSize', markerSizeOut );
+                plot( mean([tStart(i),tEnd(i)]), 60*peakW(i), markerIconOut, 'Color', rgbOutPeakWidth, 'LineWidth', 2, 'MarkerSize', markerSizeOut );
             else
                 plot( [tStart(i),tEnd(i)], 60*peakW(i)*[1,1], 'LineWidth', 4, 'Color', rgbPeakWidth );
             end
@@ -350,7 +355,7 @@ if ( isVerbose )
     diary( fullfile( resultsDir, 'results_cardsync_intraslice.md' ) )
     fprintf( '## Intra-Slice Card. Sync.\n\n' )
     fprintf( '### R-R Interval v. Time\n\n' )
-    fprintf( sprintf( '![](figs/png/%s)\n\n', 'rr_v_time.png' ) )
+    fprintf( sprintf( '![](figs/png/%s)\n\n', 'rr_peak_height_width_v_time.png' ) )
     fprintf( '### Heart Rate Estimates\n\n' )
     for iStk = 1:nStack
         fprintf( '#### %s\n\n',  S(iStk).desc )
