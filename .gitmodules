@@ -4,3 +4,6 @@
 [submodule "irtk_cardiac4d"]
 	path = irtk_cardiac4d
 	url = https://github.com/jfpva/irtk_cardiac4d
+[submodule "SVRTK"]
+	path = SVRTK
+	url = https://github.com/SVRTK/SVRTK
