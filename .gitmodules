@@ -4,3 +4,6 @@
 [submodule "SVRTK"]
 	path = SVRTK
 	url = https://github.com/SVRTK/SVRTK
+[submodule "synthflow_phantom"]
+	path = synthflow_phantom
+	url = https://github.com/tomaroberts/synthflow_phantom
