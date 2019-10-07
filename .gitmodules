@@ -1,6 +1,9 @@
 [submodule "ktrecon"]
 	path = ktrecon
 	url = https://github.com/jfpva/ktrecon.git
-[submodule "irtk_cardiac4d"]
-	path = irtk_cardiac4d
-	url = https://github.com/jfpva/irtk_cardiac4d
+[submodule "SVRTK"]
+	path = SVRTK
+	url = https://github.com/SVRTK/SVRTK
+[submodule "synthflow_phantom"]
+	path = synthflow_phantom
+	url = https://github.com/tomaroberts/synthflow_phantom
