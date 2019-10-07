@@ -58,15 +58,15 @@ echo reconstructing DC volume: $RECONVOLDIR/$RECON
 ITER=$(($NMC+1))
 NUMSTACK=$(ls -1 ../data/s*_dc_ab.nii.gz | wc -l);
 EXCLUDESTACK=$(cat $EXCLUDESTACKFILE)
-NUMEXCLUDESTACK=$(eval "wc -w $EXCLUDESTACKFILE | awk -F'[ ]' '{print \$1}'" )
+NUMEXCLUDESTACK=$(eval "wc -w $EXCLUDESTACKFILE | awk -F' ' '{print \$1}'" )
 EXCLUDESLICE=$(cat $EXCLUDESLICEFILE)
-NUMEXCLUDESLICE=$(eval "wc -w $EXCLUDESLICEFILE | awk -F'[ ]' '{print \$1}'" )
+NUMEXCLUDESLICE=$(eval "wc -w $EXCLUDESLICEFILE | awk -F' ' '{print \$1}'" )
 echo "   target stack no.: "$TGTSTACKNO
 
 
 # Reconstruct DC Volume
 
-CMD="reconstructionCardiac $RECON $NUMSTACK $STACKS -thickness $THICKNESS -stack_registration -target_stack $TGTSTACKNO -mask $MASKDCVOL -iterations $ITER -rec_iterations $NSR -rec_iterations_last $NSRLAST -resolution $RESOLUTION -force_exclude_stack $NUMEXCLUDESTACK $EXCLUDESTACK -force_exclude_sliceloc $NUMEXCLUDESLICE $EXCLUDESLICE -no_robust_statistics -numcardphase $NUMCARDPHASE -debug > log-main.txt"
+CMD="mirtk reconstructCardiac $RECON $NUMSTACK $STACKS -thickness $THICKNESS -stack_registration -target_stack $TGTSTACKNO -mask $MASKDCVOL -iterations $ITER -rec_iterations $NSR -rec_iterations_last $NSRLAST -resolution $RESOLUTION -force_exclude_stack $NUMEXCLUDESTACK $EXCLUDESTACK -force_exclude_sliceloc $NUMEXCLUDESLICE $EXCLUDESLICE -numcardphase $NUMCARDPHASE -no_robust_statistics -debug > log-main.txt"
 echo reconstructing DC volume: $CMD
 echo $CMD > recon.bash
 eval $CMD
