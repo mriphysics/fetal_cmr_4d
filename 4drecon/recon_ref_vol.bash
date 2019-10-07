@@ -69,9 +69,9 @@ STACKMASKALL="../mask/s*_mask_heart.nii.gz"
 STACKMASKFILES=(../mask/s*_mask_heart.nii.gz)
 STACKMASKTGT=${STACKMASKFILES[$TGTSTACKNO-1]}
 EXCLUDESTACK=$(cat $EXCLUDESTACKFILE)
-NUMEXCLUDESTACK=$(eval "wc -w $EXCLUDESTACKFILE | awk -F'[ ]' '{print \$1}'" )
+NUMEXCLUDESTACK=$(eval "wc -w $EXCLUDESTACKFILE | awk -F' ' '{print \$1}'" )
 EXCLUDESLICE=$(cat $EXCLUDESLICEFILE)
-NUMEXCLUDESLICE=$(eval "wc -w $EXCLUDESLICEFILE | awk -F'[ ]' '{print \$1}'" )
+NUMEXCLUDESLICE=$(eval "wc -w $EXCLUDESLICEFILE | awk -F' ' '{print \$1}'" )
 echo "   target stack no.: "$TGTSTACKNO
 echo "   target stack mask: "$STACKMASKTGT
 
@@ -79,20 +79,23 @@ echo "   target stack mask: "$STACKMASKTGT
 # Generate Stack-Stack RReg Mask
 
 echo generating stack-stack rreg mask: $MASKSTACKRREG
-enlarge_image $STACKMASKTGT $MASKSTACKRREG -z $NUMSLICEENLARGE > /dev/null
-resample $MASKSTACKRREG $MASKSTACKRREG -size $RESOLUTION $RESOLUTION $RESOLUTION > /dev/null
-combineimages $MASKSTACKRREG $STACKMASKALL $MASKSTACKRREG > /dev/null
-threshold $MASKSTACKRREG $MASKSTACKRREG 0 > /dev/null
+
+mirtk enlarge_image $STACKMASKTGT $MASKSTACKRREG -z $NUMSLICEENLARGE > /dev/null
+mirtk resample-image $MASKSTACKRREG $MASKSTACKRREG -size $RESOLUTION $RESOLUTION $RESOLUTION > /dev/null
+mirtk combine_masks $MASKSTACKRREG $STACKMASKALL $MASKSTACKRREG > /dev/null
+mirtk threshold_image $MASKSTACKRREG $MASKSTACKRREG 0 > /dev/null
+
 echo "   blurring ROI with radius =" $ROIBLURSTACKRREG "mm (sigma =" $ROIBLURSTACKRREGSIGMA "mm)"
 SIGMA=$(echo "$ROIBLURSTACKRREGSIGMA+2*$RESOLUTION" | bc -l)  # NOTE: additional blurring+erosion to smooth mask
-blur $MASKSTACKRREG $MASKSTACKRREG $SIGMA -3D > /dev/null
-threshold $MASKSTACKRREG $MASKSTACKRREG $ROIBLURTHRESH > /dev/null 
-erosion $MASKSTACKRREG $MASKSTACKRREG -iterations 4 > /dev/null 
-closing $MASKSTACKRREG $MASKSTACKRREG -iterations $NUMROICLOSINGITER > /dev/null
 
-# Estimate Stack-Stack Transformations
+mirtk smooth-image $MASKSTACKRREG $MASKSTACKRREG $SIGMA -3D > /dev/null
+mirtk threshold_image $MASKSTACKRREG $MASKSTACKRREG $ROIBLURTHRESH > /dev/null
+mirtk erode-image $MASKSTACKRREG $MASKSTACKRREG -iterations 7 > /dev/null
+mirtk close-image $MASKSTACKRREG $MASKSTACKRREG -iterations $NUMROICLOSINGITER > /dev/null
 
-CMD="reconstructionCardiac $RECON $NUMSTACK $STACKS -thickness $THICKNESS -stack_registration -target_stack $TGTSTACKNO -mask $MASKSTACKRREG -iterations 1 -rec_iterations_last 8 -resolution $RESOLUTION -force_exclude_stack $NUMEXCLUDESTACK $EXCLUDESTACK -force_exclude_sliceloc $NUMEXCLUDESLICE $EXCLUDESLICE -force_exclude $NUMEXCLUDEFRAME $EXCLUDEFRAME -no_robust_statistics -numcardphase $NUMCARDPHASE -debug > log-main.txt"
+# Estimate Stack-Stack Transformations  
+
+CMD="mirtk reconstructCardiac $RECON $NUMSTACK $STACKS -thickness $THICKNESS -stack_registration -target_stack $TGTSTACKNO -mask $MASKSTACKRREG -iterations 1 -rec_iterations_last 8 -resolution $RESOLUTION -force_exclude_stack $NUMEXCLUDESTACK $EXCLUDESTACK -force_exclude_sliceloc $NUMEXCLUDESLICE $EXCLUDESLICE -force_exclude $NUMEXCLUDEFRAME $EXCLUDEFRAME -no_robust_statistics -numcardphase $NUMCARDPHASE -debug > log-main.txt"
 echo estimating stack-stack transformations: $CMD
 eval $CMD
 
@@ -112,21 +115,23 @@ rm *.*
 # Generate Volume Recon Mask
 
 echo volume reconstruction mask: $MASKDCVOL
-enlarge_image $STACKMASKTGT $MASKDCVOL -z $NUMSLICEENLARGE > /dev/null
-resample $MASKDCVOL $MASKDCVOL -size $RESOLUTION $RESOLUTION $RESOLUTION > /dev/null
-combineimages $MASKDCVOL $STACKMASKALL $MASKDCVOL > /dev/null
-threshold $MASKDCVOL $MASKDCVOL 0 > /dev/null
+
+mirtk enlarge_image $STACKMASKTGT $MASKDCVOL -z $NUMSLICEENLARGE > /dev/null
+mirtk resample-image $MASKDCVOL $MASKDCVOL -size $RESOLUTION $RESOLUTION $RESOLUTION > /dev/null
+mirtk combine_masks $MASKDCVOL $STACKMASKALL $MASKDCVOL > /dev/null
+mirtk threshold_image $MASKDCVOL $MASKDCVOL 0 > /dev/null
+
 echo "   blurring ROI with radius =" $ROIBLURDCVOL "mm (sigma =" $ROIBLURDCVOLSIGMA "mm)"
 SIGMA=$(echo "$ROIBLURDCVOLSIGMA+2*$RESOLUTION" | bc -l)  # NOTE: additional blurring+erosion to smooth mask
-blur $MASKDCVOL $MASKDCVOL $SIGMA -3D > /dev/null
-threshold $MASKDCVOL $MASKDCVOL $ROIBLURTHRESH > /dev/null 
-erosion $MASKDCVOL $MASKDCVOL -iterations 4 > /dev/null 
-closing $MASKDCVOL $MASKDCVOL -iterations $NUMROICLOSINGITER > /dev/null
 
+mirtk smooth-image $MASKDCVOL $MASKDCVOL $SIGMA -3D > /dev/null
+mirtk threshold_image $MASKDCVOL $MASKDCVOL $ROIBLURTHRESH > /dev/null
+mirtk erode-image $MASKDCVOL $MASKDCVOL -iterations 7 > /dev/null
+mirtk close-image $MASKDCVOL $MASKDCVOL -iterations $NUMROICLOSINGITER > /dev/null
 
 # Reconstruct Reference Volume
 
-CMD="reconstructionCardiac $RECON $NUMSTACK $STACKS -thickness $THICKNESS -dofin $STACKDOFDIR/stack-transformation*.dof -mask $MASKDCVOL -iterations 1 -rec_iterations_last 8 -resolution $RESOLUTION -force_exclude_stack $NUMEXCLUDESTACK $EXCLUDESTACK -force_exclude_sliceloc $NUMEXCLUDESLICE $EXCLUDESLICE -no_robust_statistics -numcardphase $NUMCARDPHASE -debug > log-main.txt"
+CMD="mirtk reconstructCardiac $RECON $NUMSTACK $STACKS -thickness $THICKNESS -dofin $STACKDOFDIR/stack-transformation*.dof -mask $MASKDCVOL -iterations 1 -rec_iterations_last 8 -resolution $RESOLUTION -force_exclude_stack $NUMEXCLUDESTACK $EXCLUDESTACK -force_exclude_sliceloc $NUMEXCLUDESLICE $EXCLUDESLICE -no_robust_statistics -numcardphase $NUMCARDPHASE -debug > log-main.txt"
 echo reconstructing volume: $CMD
 eval $CMD
 
