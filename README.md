@@ -227,7 +227,7 @@ e.g., in shell:
 		% slice-slice cardiac synchronisation
 		S = cardsync_interslice( M.S, 'recondir', cineDir, 'resultsdir', cardsyncDir, 'tgtloc', tgtLoc, 'excludeloc', excludeSlice );
 		```
-	11. __Motion-Correction (dynamic) & 4D Volumetric Reconstruction__
+11. __Motion-Correction (dynamic) & 4D Volumetric Reconstruction__
     - motion correction performed interleaved with 4D Reconstruction
     - recon 4D magnitude volume, \
 	    e.g., in shell: 
@@ -236,7 +236,7 @@ e.g., in shell:
 	    ./recon_cine_vol.bash $RECONDIR cine_vol
 	    ```
 
-	12. __Motion-Correction (dynamic) & 4D Magnitude Volumetric Reconstruction__  \
+12. __Motion-Correction (dynamic) & 4D Magnitude Volumetric Reconstruction__  \
 		e.g., in Matlab:  
 		```matlab
 		S = summarise_recon( '~/path/to/recon/directory/cine_vol', '~/path/to/recon/directory/cardsync', 'verbose', true );
