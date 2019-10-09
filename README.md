@@ -49,6 +49,8 @@ For Python code, install [Jupyter](https://jupyter.org/) or [PyCharm](https://ww
 
 Install Paraview for visualisation of 4D flow volumes: [paraview.org](https://www.paraview.org/). Note, version 5.4.1 is known to be stable.
 
+Installation time varies depending on how many libraries and programs you already have installed. Typically everything can be installed in less than one hour.
+
 
 ## External Dependencies
 
@@ -57,9 +59,11 @@ __ReconFrame__ - software platform providing the tools and the functionality to 
 
 ## Demo Dataset
 
-A demo dataset can be [downloaded from Figshare](https://doi.org/10.6084/m9.figshare.c.4689437). 
+A demo dataset can be [downloaded from Figshare](https://figshare.com/collections/Demo_dataset_for_fetal_whole-heart_4D_reconstruction/4689437/2). 
 
 The demo dataset consists of multiple stacks of 2D slices acquired in a normal fetus. A Matlab script is included alongside the demo dataset, which follows the 4D reconstruction framework outlined below. The script comprises various Matlab functions and tells the user when to run the bash scripts.
+
+The expected run time for the demo, from slices to 4D volumes, is 6+ hours depending on computer power and familiarity with the concepts and scripts.
 
 Note: the nifti files provided in the demo dataset have been reconstructed using the ktrecon submodule, which requires ReconFrame. Similarly, we provide the gradient first moment text files, which we would normally automatically generate using ReconFrame.
 
