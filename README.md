@@ -43,7 +43,7 @@ Add repository to MATLAB path.
 
 Build instructions for SVRTK can be found in the InstallationInstructions.txt file at [github.com/SVRTK/SVRTK](https://github.com/SVRTK/SVRTK).
 
-Install MITK Workbench for viewing data and drawing masks: [mitk.org/wiki/The_Medical_Imaging_Interaction_Toolkit_(MITK)](http://mitk.org/wiki/The_Medical_Imaging_Interaction_Toolkit_(MITK)).
+Install MITK Workbench for viewing data and drawing masks: [mitk.org/wiki/The_Medical_Imaging_Interaction_Toolkit_(MITK)](http://mitk.org/wiki/The_Medical_Imaging_Interaction_Toolkit_(MITK)). Note, 2016.11 version is known to be stable.
 
 For Python code, install [Jupyter](https://jupyter.org/) or [PyCharm](https://www.jetbrains.com/pycharm/).
 
@@ -59,7 +59,7 @@ __ReconFrame__ - software platform providing the tools and the functionality to 
 
 ## Demo Dataset
 
-A demo dataset can be [downloaded from Figshare](https://figshare.com/collections/Demo_dataset_for_fetal_whole-heart_4D_reconstruction/4689437/2). 
+A demo dataset can be [downloaded from Figshare](https://figshare.com/collections/Demo_dataset_for_fetal_whole-heart_4D_reconstruction/4689437). 
 
 The demo dataset consists of multiple stacks of 2D slices acquired in a normal fetus. A Matlab script is included alongside the demo dataset, which follows the 4D reconstruction framework outlined below. The script comprises various Matlab functions and tells the user when to run the bash scripts.
 
