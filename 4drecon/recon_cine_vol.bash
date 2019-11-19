@@ -45,7 +45,7 @@ EXCLUDESTACKFILE="../data/force_exclude_stack.txt"
 EXCLUDESLICEFILE="../data/force_exclude_slice.txt"
 EXCLUDEFRAMEFILE="../data/force_exclude_frame.txt"
 RESOLUTION=1.25
-NMC=2 # TAR --- adjusted to 2 so that ITER = 3. ITER > 3 crashes MIRTK
+NMC=3 # NB: if crashes, try 2
 NSR=10
 NSRLAST=20
 NUMCARDPHASE=25
@@ -60,6 +60,12 @@ MEANRRFILE="../cardsync/mean_rrinterval.txt"
 RRINTERVALSFILE="../cardsync/rrintervals.txt"
 CARDPHASESFILE="../cardsync/cardphases_interslice_cardsync.txt"
 
+# echo
+# echo "RUNNING WITH PARAMETERS:"
+# echo "NMC="$NMC
+# echo "NSR="$NSR
+# echo "NSRLAST="$NSRLAST
+# echo
 
 # Setup
 
@@ -138,7 +144,7 @@ mirtk pad_image $MASKCINEVOL mask_chest_vol.nii.gz $MASKCINEVOL 0 0 > /dev/null
 # Recon Cine Volume
 
 echo reconstructing cine volume: $RECON
-CMD="mirtk reconstructCardiac $RECON $NUMSTACK $STACKS -thickness $THICKNESS -dofin $STACKDOFDIR/stack-transformation*.dof -slice_transformations $SLICEDOFDIR -mask $MASKCINEVOL -iterations $ITER -rec_iterations $NSR -rec_iterations_last $NSRLAST -resolution $RESOLUTION -force_exclude_stack $NUMEXCLUDESTACK $EXCLUDESTACK -force_exclude_sliceloc $NUMEXCLUDESLICE $EXCLUDESLICE -force_exclude $NUMEXCLUDEFRAME $EXCLUDEFRAME -numcardphase $NUMCARDPHASE -rrinterval $MEANRR -rrintervals $NUMSLICE $RRINTERVALS -cardphase $NUMFRAME $CARDPHASES -debug > log-main.txt"
+CMD="mirtk reconstructCardiac $RECON $NUMSTACK $STACKS -thickness $THICKNESS -dofin $STACKDOFDIR/stack-transformation*.dof -slice_transformations $SLICEDOFDIR -mask $MASKCINEVOL -remote -iterations $ITER -rec_iterations $NSR -rec_iterations_last $NSRLAST -resolution $RESOLUTION -force_exclude_stack $NUMEXCLUDESTACK $EXCLUDESTACK -force_exclude_sliceloc $NUMEXCLUDESLICE $EXCLUDESLICE -force_exclude $NUMEXCLUDEFRAME $EXCLUDEFRAME -numcardphase $NUMCARDPHASE -rrinterval $MEANRR -rrintervals $NUMSLICE $RRINTERVALS -cardphase $NUMFRAME $CARDPHASES -debug > log-main.txt"
 echo $CMD > recon.bash
 eval $CMD
 
