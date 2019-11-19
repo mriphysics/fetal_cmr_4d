@@ -177,7 +177,8 @@ for mm = 1:numel(velMasks)
     mask.img = double(mask.img);
     
     % fix mask_aorta/mask_IVC_SVC for fcmr194 (to do with extra voxels when re-slicing):
-    if exist(fcmrNum)
+    fcmrNum = 194;
+    if any(fcmrNum)
         if fcmrNum == 194 && strcmp(maskFileName,'mask_aorta') == 1 || fcmrNum == 194 && strcmp(maskFileName,'mask_IVC_SVC') == 1
             for tt = 1:nFrame; mask_re.img(:,:,:,tt) = imresize3(mask.img(:,:,:,tt),size(cine_nii.img(:,:,:,tt))); end
             mask.img = mask_re.img; clear mask_re;
@@ -305,15 +306,19 @@ cd([velDir '_4d']);
 if strcmp(fileExt,'')
     mkdir(['mrtrix' foldnameAppend]);
     cd(['mrtrix' foldnameAppend])
+    
+    % get .nii to use as basis
+    Vx3D_nii = load_untouch_nii([reconDir '\' velDir '\velocity-final-RESLICE-0.nii.gz']);
 else
 	mkdir(['mrtrix_' fileExt foldnameAppend]);
     cd(['mrtrix_' fileExt foldnameAppend]);
+    
+    % get .nii to use as basis
+    Vx3D_nii = load_untouch_nii([reconDir '\' velDir '\velocity-final-' fileExt '-RESLICE-0.nii.gz']);
 end
 
-disp('Writing .nii.gz files ... ');
 
-% get .nii to use as basis
-Vx3D_nii = load_untouch_nii([reconDir '\' velDir '\velocity-final-RESLICE-0.nii.gz']);
+disp('Writing .nii.gz files ... ');
 
 for tt = 1:nFrame
     v3D = Vx3D_nii;
