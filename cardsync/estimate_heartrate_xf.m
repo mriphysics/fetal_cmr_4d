@@ -1,4 +1,4 @@
-function [ rrInterval, triggerTime, relativePeakProminence, peakWidth, peakLocDiff ] = estimate_heartrate_xf( imSeq, frameDuration, varargin )
+function [ rrInterval, triggerTime, relativePeakProminence, peakWidth, peakLocDiff, fPeak ] = estimate_heartrate_xf( imSeq, frameDuration, varargin )
 %ESTIMATE_HEARTRATE_XF   Estimate heartrate in x-f space.
 %
 %   [ rrInterval ] = ESTIMATE_HEARTRATE_XF( imSeq, frameDuration ) 
