@@ -42,6 +42,7 @@ STACKS="../data/s*_rlt_ph_corr_uterus.nii.gz"
 GRADMOMVALSFILE="../data/grad_moment_vals.txt"
 GRADMOMDIRSFILE="../data/grad_moment_dirs.txt"
 THICKNESSFILE="../data/slice_thickness.txt"
+EXCLUDESLICEFILE="../data/force_exclude_slice.txt"
 EXCLUDECINEVOLFILE="../data/force_exclude_cine_vol.txt"
 RESOLUTION=1.25
 NMC=0
@@ -68,6 +69,8 @@ NUMSTACK=$(ls -1 ../data/s*_dc_ab.nii.gz | wc -l);
 NUMSLICE=$(eval "wc -w $RRINTERVALSFILE | awk -F' ' '{print \$1}'" )
 NUMFRAME=$(eval "wc -w $CARDPHASESFILE | awk -F' ' '{print \$1}'" )
 
+EXCLUDESLICE=$(cat $EXCLUDESLICEFILE)
+NUMEXCLUDESLICE=$(eval "wc -w $EXCLUDESLICEFILE | awk -F' ' '{print \$1}'" )
 EXCLUDECINEVOL=$(cat $EXCLUDECINEVOLFILE)
 NUMEXCLUDECINEVOL=$(eval "wc -w $EXCLUDECINEVOLFILE | awk -F' ' '{print \$1}'" )
 
@@ -75,7 +78,7 @@ NUMEXCLUDECINEVOL=$(eval "wc -w $EXCLUDECINEVOLFILE | awk -F' ' '{print \$1}'" )
 # Recon Velocity Cine Volume
 
 echo reconstructing velocity cine volume:
-CMD="mirtk reconstructCardiacVelocity $NUMSTACK $STACKS $GRADMOMVALSFILE $GRADMOMDIRSFILE -thickness $THICKNESS -dofin $STACKDOFDIR/stack-transformation*.dof -transformations $CINETRANSDIR -mask $MASKCINEVOL -alpha $ALPHA -limit_intensities -rec_iterations $NSR -resolution $RESOLUTION -force_exclude_stack 0 -force_exclude_sliceloc 0 -force_exclude $NUMEXCLUDECINEVOL $EXCLUDECINEVOL -numcardphase $NUMCARDPHASE -rrinterval $MEANRR -rrintervals $NUMSLICE $RRINTERVALS -cardphase $NUMFRAME $CARDPHASES -debug > log-main.txt"
+CMD="mirtk reconstructCardiacVelocity $NUMSTACK $STACKS $GRADMOMVALSFILE $GRADMOMDIRSFILE -thickness $THICKNESS -dofin $STACKDOFDIR/stack-transformation*.dof -transformations $CINETRANSDIR -mask $MASKCINEVOL -alpha $ALPHA -limit_intensities -rec_iterations $NSR -resolution $RESOLUTION -force_exclude_stack 0 -force_exclude_sliceloc $NUMEXCLUDESLICE $EXCLUDESLICE -force_exclude $NUMEXCLUDECINEVOL $EXCLUDECINEVOL -numcardphase $NUMCARDPHASE -rrinterval $MEANRR -rrintervals $NUMSLICE $RRINTERVALS -cardphase $NUMFRAME $CARDPHASES -debug > log-main.txt"
 echo $CMD > recon.bash
 eval $CMD
 
