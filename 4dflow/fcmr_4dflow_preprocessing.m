@@ -1,4 +1,4 @@
-function fcmr_4dflow_preprocessing( reconDir, rawDir )
+function fcmr_4dflow_preprocessing( reconDir, ktreconDir, cinevolDir, rawDir )
 %FCMR_4DFLOW_PREPROCESSING  pre-processing of 4D flow real-time data
 %
 %   FCMR_4DFLOW_PREPROCESSING( reconDir, ... )
@@ -15,6 +15,7 @@ function fcmr_4dflow_preprocessing( reconDir, rawDir )
 %
 %   Input:
 %       reconDir            - str - fetal reconstruction directory
+%       cineDir             - str - cine_vol directory
 %
 %   Optional Inputs:
 %       rawDir              - str - directory on server containing .raw data
@@ -32,8 +33,13 @@ function fcmr_4dflow_preprocessing( reconDir, rawDir )
 %% Default paths
 % - for example:
 
-% ingenia-raw
 if nargin < 2
+    ktreconDir = 'ktrecon';
+    cinevolDir = 'cine_vol';
+    rawDir = 'Z:\';
+end
+
+if nargin < 4
     rawDir = 'Z:\';
 end
 
@@ -41,7 +47,7 @@ end
 %% Create Text File of Slices Excluded from cine_vol Reconstruction
 %- used in recon_vel_vol.bash
 cd(reconDir);    
-cd cine_vol
+cd(cinevolDir);
 
 % Open cine_vol log-evaluation.txt
 fid = fopen('log-evaluation.txt');
@@ -114,11 +120,11 @@ end
 
 cd(reconDir);    
 cd data
-sIDs = dir('s*_rlt_ab.nii.gz');
+sIDs = dir('s*_rlt_ab*.nii.gz');
 numStacks = numel(sIDs);
 
 cd ..    
-cd ktrecon
+cd(ktreconDir)
     
 for ss = 1:numStacks
 
@@ -150,7 +156,7 @@ for ss = 1:numStacks
     cd ../mask
     uterus_mask = load_untouch_nii([sIDs(ss).name(1:3) '_mask_uterus.nii.gz']);
     heart_mask  = load_untouch_nii([sIDs(ss).name(1:3) '_mask_heart.nii.gz']);
-    cd ../ktrecon
+    cd(['../' ktreconDir]);
 
     % run polynomial correction
     % - Y is corrected complex data, ie: cx_corr.img

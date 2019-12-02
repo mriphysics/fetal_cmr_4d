@@ -1,13 +1,15 @@
 #### path/variable admin
-fcmrNum = 194
-foldExt = '_testingMIRTKwSVRTK'
+fcmrNum = 202
+foldExt = '_hrh_fullRecon'
+# foldExt = ''
 pvStateExt = ''
 velDir = '\\vel_vol_4d'
 # velDir = '\\vel_vol_trans_4d'
 
 # pvFold = '\\paraview' + '\\'
-pvFold = '\\paraview_polyCorr' + '\\'
-# pvFold = '\\paraview_polyCorr_aorta_LV_RV_LOT_ROT_LA_RA_IVC_SVC_PA_DA' + '\\'
+# pvFold = '\\paraview_polyCorr' + '\\'
+pvFold = '\\paraview_polyCorr_aorta_LV_RV_LOT_ROT_LA_RA_IVC_SVC_PA_DA' + '\\'
+# pvFold = '\\paraview_polyCorr_aorta_LV_RV_LOT_ROT_LA_RA_IVC_SVC' + '\\'
 
 fcmrDir = 'E:\\Users\\tr17\\Documents\\Projects\\PC_Fetal_CMR\\Data\\4D_Flow_Paper\\fcmr'
 path = fcmrDir + str(fcmrNum) + foldExt + velDir + pvFold

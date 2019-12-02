@@ -37,6 +37,8 @@ function fcmr_4dflow_get_first_moments( reconDir, varargin )
 %% Parse Input
 
 default.Vmps              = [5.96, 0, -4.35]; % default values for iFIND protocol
+default.ktreconDir        = 'ktrecon';
+default.dataDir           = 'data';
 
 p = inputParser;
 
@@ -51,16 +53,24 @@ addRequired(  p, 'fcmrDir' );
 add_param_fn( p, 'Vmps', default.Vmps, ...
         @(x) validateattributes( x, {'double'}, ...
         {}, mfilename ) );
+    
+add_param_fn( p, 'ktreconDir', default.ktreconDir, ...
+        @(x) validateattributes( x, {'char'}, ...
+        {}, mfilename ) );
+    
+add_param_fn( p, 'dataDir', default.dataDir, ...
+        @(x) validateattributes( x, {'char'}, ...
+        {}, mfilename ) );
 
 parse( p, reconDir, varargin{:} );
 
 Vmps               = p.Results.Vmps;
+ktreconDir         = p.Results.ktreconDir;
+dataDir            = p.Results.dataDir;
 
 
 %% Directory admin
 % rawDir = '/raw';
-ktreconDir = '/ktrecon';
-dataDir = '/data';
 
 
 %% First moment values from GVE
@@ -87,7 +97,7 @@ end
 
 
 %% Convert to world/xyz coordinates
-cd([reconDir ktreconDir]);
+cd( fullfile( reconDir, ktreconDir ) );
 
 gcFiles = dir('*goalc.txt');
 
@@ -129,7 +139,7 @@ end
 
 %% save grad_moment.txt files compatible with SVRTK
 %  (and ORIENT object)
-cd ../data
+cd( fullfile( reconDir, dataDir ) );
 
 % For SVRTK
 fileID = fopen('grad_moment_dirs.txt','w');
